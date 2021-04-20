@@ -1,0 +1,679 @@
+{
+	"info": {
+		"_postman_id": "a0967f0d-7612-4868-bd5e-cec47b361a27",
+		"name": "Ribbon Auth Manager",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Onboard Phone Number",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//function to generate random phone numbers\r",
+							"function getRandom(length) {\r",
+							"    num = Math.floor(Math.pow(10, length-1) + Math.random() * 9 * Math.pow(10, length-1));\r",
+							"return \"+234\" + num;\r",
+							"}\r",
+							"pm.environment.set(\"rphone\", getRandom(10));\r",
+							"\r",
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Otp received\", function () {\r",
+							"    var jsonData= pm.response.json();\r",
+							"    pm.expect(jsonData.otp).to.not.include(null);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"//console.log(getRandom(10));\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"\r",
+							"//setting user ID, Otp and Phone number as an environment variable\r",
+							"pm.environment.set(\"Id\", jsonData.user._id);\r",
+							"pm.environment.set(\"OTP\", jsonData.otp);\r",
+							"pm.environment.set(\"phoneNumber\", jsonData.user.phoneNumber);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"phoneNumber\": \"{{rphone}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/start",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Already Existing User test",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 409\", function () {\r",
+							"    pm.response.to.have.status(409);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message Already exist received\", function (){\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.eql(\"User already Exist\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"phoneNumber\": \"+2348033152290\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/start",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Invalid phone number test",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"phoneNumber\": \"+234kkkkkkkkkkk\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/start",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Wrong request method test",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"phoneNumber\": \"{{rphone}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/start",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OTP validation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message received\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.eql(\"Otp validated successfully\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"otp\":\"{{OTP}}\",\r\n  \"id\": \"{{Id}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/validateotp",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"validateotp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Invalid OTP Test",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 409\", function () {\r",
+							"    pm.response.to.have.status(409);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message Invalid otp received\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.eql(\"Invalid otp\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"otp\":\"978334\",\r\n  \"id\": \"607e8c2381e1ae001f7ea9fb\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/validateotp",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"validateotp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OTP validation(wrong request )",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"otp\":\"978334\",\r\n  \"id\": \"607e8c2381e1ae001f7ea9fb\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/validateotp",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"validateotp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Set Pin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Role recieved\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.user.role).to.eql('PATIENT');\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"pin\": \"00000\",\r\n  \"confirmPin\": \"00000\",\r\n  \"id\": \"{{Id}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/completesignup",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"completesignup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Set Pin test(wrong request)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"pin\": \"00000\",\r\n  \"confirmPin\": \"00000\",\r\n  \"id\": \"{{Id}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/completesignup",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"completesignup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"phoneNumber\": \"{{phoneNumber}}\",\r\n  \"pin\": \"00000\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/login",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Login test(invalid pin)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 409\", function () {\r",
+							"    pm.response.to.have.status(409);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Password Dont match message receieved\", function (){\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.include(\"dont match\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"phoneNumber\": \"{{phoneNumber}}\",\r\n  \"pin\": \"11111\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/login",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Login test(wrong request)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"phoneNumber\": \"{{phoneNumber}}\",\r\n  \"pin\": \"00000\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/login",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Resend OTP",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"\r",
+							"//setting new otp as an environment variable\r",
+							"pm.environment.set(\"OTP\", jsonData.otp);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/resendotp/{{Id}}",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"resendotp",
+						"{{Id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Resend OTP test(Invalid Id)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 409\", function () {\r",
+							"    pm.response.to.have.status(409);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Cannot send otp message receieved\", function (){\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.eql(\"Cannot send otp\")\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/resendotp/i785906559575",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"resendotp",
+						"i785906559575"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Resend OTP test(wrong request)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}api/v1/auth/resendotp/{{Id}}",
+					"host": [
+						"{{baseurl}}api"
+					],
+					"path": [
+						"v1",
+						"auth",
+						"resendotp",
+						"{{Id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
